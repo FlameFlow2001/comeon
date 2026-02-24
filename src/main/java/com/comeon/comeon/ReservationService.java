@@ -81,6 +81,45 @@ public class ReservationService {
     }
 
     public Reservation approveReservation(Long id) {
-        return null;
+        if (!reservationMap.containsKey(id))
+        {
+            throw new NoSuchElementException("Reservation was not found by ID");
+        }
+        var reservation = reservationMap.get(id);
+        if (reservation.status() != ReservationStatus.PENDING){
+            throw new IllegalStateException("Cannot modify reservation: status = " + reservation.status());
+        }
+        var isConflicted = isReservationConflicted(reservation);
+        if (isConflicted){
+            throw new IllegalStateException("Cannot approve reservation because of conflict of dates");
+        }
+        var approvedReservation = new Reservation(reservation.id(),
+                reservation.userId(),
+                reservation.roomId(),
+                reservation.startDate(),
+                reservation.endDate(),
+                ReservationStatus.APPROVED
+        );
+        reservationMap.put(reservation.id(), approvedReservation);
+        return approvedReservation;
+    }
+
+    private boolean isReservationConflicted(Reservation reservation){
+        for (Reservation existingReservation: reservationMap.values()){
+            if (reservation.id().equals(existingReservation.id())){
+                continue;
+            }
+            if (!reservation.roomId().equals(existingReservation.roomId())){
+                continue;
+            }
+            if (!existingReservation.status().equals(ReservationStatus.APPROVED)){
+                continue;
+            }
+            if (reservation.startDate().isBefore(existingReservation.endDate())
+            && existingReservation.startDate().isBefore(reservation.endDate())){
+                return true;
+            }
+        }
+        return false;
     }
 }
