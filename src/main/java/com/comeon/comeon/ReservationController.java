@@ -1,5 +1,6 @@
 package com.comeon.comeon;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class ReservationController
     }
 
     @PostMapping()
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservationToCreate){
+    public ResponseEntity<Reservation> createReservation(@RequestBody @Valid Reservation reservationToCreate){
         log.info("createReservation method is called");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header("test-header", "123")
@@ -44,7 +45,7 @@ public class ReservationController
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(
             @PathVariable("id") Long id,
-            @RequestBody Reservation reservationToUpdate
+            @RequestBody @Valid Reservation reservationToUpdate
     )
     {
         log.info("Called method updateReservation: id = {}, reservationToUpdate = {}", id, reservationToUpdate);
